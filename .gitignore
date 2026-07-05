@@ -1,0 +1,55 @@
+# ── Python ──────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.python-version
+
+# ── 노트북 ──────────────────────────────────
+.ipynb_checkpoints/
+
+# ── 비밀정보 (API 키, 토큰) ─────────────────
+.env
+.env.*
+*.key
+secrets*
+
+# ── 실험 추적 / 캐시 ────────────────────────
+wandb/
+.cache/
+huggingface/
+
+# ── 모델 아티팩트 (HF Hub로 공유) ───────────
+checkpoints/
+outputs/
+runs/
+*.safetensors
+*.bin
+*.gguf
+*.pt
+*.pth
+
+# ── 데이터 ──────────────────────────────────
+# 원칙: 시드/가공 데이터는 커밋 가능하되,
+# 신청제 제공 데이터(KISA 등)와 대용량 원본은 제외
+data/kisa/
+data/raw/
+*.parquet
+*.arrow
+
+# ── OS / 에디터 ─────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# ── 로그 / 임시 파일 ────────────────────────
+*.log
+*.tmp
+tmp/
