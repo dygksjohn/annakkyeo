@@ -75,6 +75,25 @@ def run(model_id: str, adapter: str | None, run_name: str, limit: int | None) ->
 
     out_dir = OUTPUT_DIR / run_name
     out_dir.mkdir(parents=True, exist_ok=True)
+
+    # 원문은 남기지 않고 예측만 저장(설명 품질 judge 입력용). orig_index 로 원본 추적.
+    with open(out_dir / "predictions.jsonl", "w", encoding="utf-8") as f:
+        for i, p in enumerate(preds):
+            f.write(
+                json.dumps(
+                    {
+                        "orig_index": int(df.iloc[i].get("orig_index", i)),
+                        "true": y_true[i],
+                        "verdict": p.verdict,
+                        "risk_factors": p.risk_factors,
+                        "explanation": p.explanation,
+                        "parse_ok": p.parse_ok,
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
+
     metrics = {
         "model": model_id, "adapter": adapter, "n": len(df),
         "parse_failures": parse_fail,
