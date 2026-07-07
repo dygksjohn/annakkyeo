@@ -41,7 +41,11 @@ def main() -> None:
 
     run_name = args.run_name or args.model.split("/")[-1].lower() + "-qlora"
     out_dir = OUTPUT_DIR / run_name
-    use_wandb = bool(os.getenv("WANDB_API_KEY")) and os.getenv("WANDB_MODE") != "disabled"
+    # 실험 추적기: REPORT_TO(wandb|tensorboard|none). 미설정 시 wandb 키 있고 활성이면 wandb, 없으면 none.
+    report_to = os.getenv("REPORT_TO", "").strip().lower()
+    if not report_to:
+        has_wandb = bool(os.getenv("WANDB_API_KEY")) and os.getenv("WANDB_MODE") != "disabled"
+        report_to = "wandb" if has_wandb else "none"
 
     bnb = BitsAndBytesConfig(
         load_in_4bit=True,
@@ -63,12 +67,15 @@ def main() -> None:
         bias="none", task_type="CAUSAL_LM", target_modules=TARGET_MODULES,
     )
 
+    # train = 실데이터(sft_train) + 증강(sft_aug, 있으면). val = 실데이터만.
+    train_files = [str(PROCESSED_DIR / "sft_train.jsonl")]
+    aug = PROCESSED_DIR / "sft_aug.jsonl"
+    if aug.exists():
+        train_files.append(str(aug))
+        print(f"증강 데이터 포함: {aug.name}")
     ds = load_dataset(
         "json",
-        data_files={
-            "train": str(PROCESSED_DIR / "sft_train.jsonl"),
-            "validation": str(PROCESSED_DIR / "sft_val.jsonl"),
-        },
+        data_files={"train": train_files, "validation": str(PROCESSED_DIR / "sft_val.jsonl")},
     )
 
     cfg = SFTConfig(
@@ -85,9 +92,9 @@ def main() -> None:
         logging_steps=5,
         eval_strategy="epoch",
         save_strategy="epoch",
-        max_seq_length=args.max_seq,
+        max_length=args.max_seq,  # trl 1.x: max_seq_length → max_length (설치 버전에 맞춤)
         packing=False,
-        report_to="wandb" if use_wandb else "none",
+        report_to=report_to,
         run_name=run_name,
     )
 
@@ -99,8 +106,9 @@ def main() -> None:
     trainer.train()
     trainer.save_model(str(out_dir))
     tok.save_pretrained(str(out_dir))
-    print(f"\n✅ 어댑터 저장: {out_dir}")
-    print("다음: PC-3 에서 평가  →  python -m src.eval_hf_model "
+    # 콘솔 이모지/기호는 한국어 Windows(cp949)에서 UnicodeEncodeError → cp949 안전 문자만 사용
+    print(f"\n[완료] 어댑터 저장: {out_dir}")
+    print("다음: PC-3 에서 평가  ->  python -m src.eval_hf_model "
           f"--model {args.model} --adapter {out_dir}")
 
 
