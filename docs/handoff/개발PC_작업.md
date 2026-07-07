@@ -17,7 +17,7 @@
 | D5 | Kor-Smishing EDA | [EDA_Kor-Smishing.md](../EDA_Kor-Smishing.md) | ✅ |
 | D6 | **증강 파이프라인** (합성 스미싱 생성) | `data/processed/sft_aug.jsonl` | ✅ 800건 (app_install 28%·callback 30%로 EDA 공백 보강). train_qlora가 자동 포함. 개선여지: suspicious_domain·fear_appeal 태그 0% |
 | D7 | 전처리 정제 (중복 141건 제거, ham 잡음 필터) | 정제 스크립트 | ⏳ |
-| D8 | **SFT+증강 데이터 HF private 업로드** | `{ns}/annakkyeo-sft` | ⏳ (GPU PC 선행조건) |
+| D8 | **SFT+증강 데이터 HF private 업로드** | `dygksjohn/annakkyeo-sft` | ⏳ (GPU PC 선행조건) |
 | D9 | 베이스 모델 최신 확인 (C3) | 계획서 4.1 갱신 | ⏳ |
 | D10 | 설명 품질 LLM-judge 스크립트 | `src/judge_explanation.py` | ⏳ (PC-3 평가 지원) |
 | D11 | 실데이터 시드 수집 (B2) | `data/seed/*.csv` | ⏳ 상시 |
@@ -36,7 +36,7 @@ python -m src.build_sft_data --train 300 --val 80   # D3 (완료)
 python -m src.baseline_gpt --n-per-class 300         # D4 (완료)
 python -m src.eda                                    # D5 (완료)
 python -m src.augment --n 800                        # D6 증강 (합성 스미싱)
-# D8 업로드: huggingface-cli upload {ns}/annakkyeo-sft data/processed --repo-type dataset --private
+# D8 업로드: hf upload dygksjohn/annakkyeo-sft data/processed --repo-type dataset --private
 ```
 
 ## Exit 조건 (GPU 작업 넘기기 전)

@@ -32,7 +32,7 @@ python -m src.train_qlora --model Qwen/Qwen3-1.7B --run-name qwen3-1.7b-v1 --epo
 
 ## 3. 어댑터 공유 (평가는 PC-3)
 ```cmd
-huggingface-cli upload {namespace}/annakkyeo-qwen3-1.7b-v1 outputs/qwen3-1.7b-v1 --repo-type model --private
+hf upload dygksjohn/annakkyeo-qwen3-1.7b-v1 outputs/qwen3-1.7b-v1 --repo-type model --private
 ```
 또는 공유 폴더로 `outputs/qwen3-1.7b-v1/` 전달. PC-3 에 "어댑터 준비됨"을 알린다.
 

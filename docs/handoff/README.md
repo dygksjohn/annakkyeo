@@ -80,9 +80,9 @@ copy .env.example .env
 데이터는 개발 PC에서 구축됨(`data/processed/sft_train.jsonl`, `sft_val.jsonl`, `eval_sample.csv`).
 Kor-Smishing 파생물이라 git 커밋 불가 → 아래 중 하나로 가져온다.
 
-- **HF private dataset (권장)**: 개발 PC가 `{namespace}/annakkyeo-sft`(private) 로 업로드해 두면
+- **HF private dataset (권장)**: 개발 PC가 `dygksjohn/annakkyeo-sft`(private) 로 업로드해 두면
   ```cmd
-  huggingface-cli download {namespace}/annakkyeo-sft --repo-type dataset --local-dir data/processed
+  hf download dygksjohn/annakkyeo-sft --repo-type dataset --local-dir data/processed
   ```
 - **공유 폴더/USB**: 같은 네트워크이므로 `data/processed/` 폴더째 복사해도 됨.
 

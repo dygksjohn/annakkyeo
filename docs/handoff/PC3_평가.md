@@ -19,7 +19,7 @@ python -m src.eval_hf_model --model Qwen/Qwen2.5-3B-Instruct   --run-name qwen3b
 ## 2. 파인튜닝 어댑터 평가 (PC-1/PC-2 산출물)
 어댑터를 HF/공유폴더에서 받아 평가:
 ```cmd
-huggingface-cli download {namespace}/annakkyeo-qwen1.5b-v1 --local-dir outputs/qwen1.5b-v1
+hf download dygksjohn/annakkyeo-qwen1.5b-v1 --local-dir outputs/qwen1.5b-v1
 python -m src.eval_hf_model --model Qwen/Qwen2.5-1.5B-Instruct --adapter outputs/qwen1.5b-v1 --run-name qwen1.5b-qlora-v1
 ```
 

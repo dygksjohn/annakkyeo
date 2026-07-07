@@ -30,7 +30,7 @@ python -m src.train_qlora --model Qwen/Qwen3-4B-Instruct-2507 --max-steps 10 --m
 
 ## 어댑터 공유 & Exit
 ```cmd
-huggingface-cli upload {namespace}/annakkyeo-<run-name> outputs/<run-name> --repo-type model --private
+hf upload dygksjohn/annakkyeo-<run-name> outputs/<run-name> --repo-type model --private
 ```
 - [ ] Kanana(A안) 어댑터 완성 (필수)
 - [ ] 여력 시 Qwen3-4B(B안)
