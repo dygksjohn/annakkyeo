@@ -88,7 +88,7 @@ def main() -> None:
         logging_steps=5,
         eval_strategy="epoch",
         save_strategy="epoch",
-        max_seq_length=args.max_seq,
+        max_length=args.max_seq,  # trl 1.x: max_seq_length → max_length (설치 버전에 맞춤)
         packing=False,
         report_to="wandb" if use_wandb else "none",
         run_name=run_name,
@@ -102,8 +102,9 @@ def main() -> None:
     trainer.train()
     trainer.save_model(str(out_dir))
     tok.save_pretrained(str(out_dir))
-    print(f"\n✅ 어댑터 저장: {out_dir}")
-    print("다음: PC-3 에서 평가  →  python -m src.eval_hf_model "
+    # 콘솔 이모지/기호는 한국어 Windows(cp949)에서 UnicodeEncodeError → cp949 안전 문자만 사용
+    print(f"\n[완료] 어댑터 저장: {out_dir}")
+    print("다음: PC-3 에서 평가  ->  python -m src.eval_hf_model "
           f"--model {args.model} --adapter {out_dir}")
 
 
