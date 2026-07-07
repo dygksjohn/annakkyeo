@@ -41,7 +41,11 @@ def main() -> None:
 
     run_name = args.run_name or args.model.split("/")[-1].lower() + "-qlora"
     out_dir = OUTPUT_DIR / run_name
-    use_wandb = bool(os.getenv("WANDB_API_KEY")) and os.getenv("WANDB_MODE") != "disabled"
+    # 실험 추적기: REPORT_TO(wandb|tensorboard|none). 미설정 시 wandb 키 있고 활성이면 wandb, 없으면 none.
+    report_to = os.getenv("REPORT_TO", "").strip().lower()
+    if not report_to:
+        has_wandb = bool(os.getenv("WANDB_API_KEY")) and os.getenv("WANDB_MODE") != "disabled"
+        report_to = "wandb" if has_wandb else "none"
 
     bnb = BitsAndBytesConfig(
         load_in_4bit=True,
@@ -90,7 +94,7 @@ def main() -> None:
         save_strategy="epoch",
         max_length=args.max_seq,  # trl 1.x: max_seq_length → max_length (설치 버전에 맞춤)
         packing=False,
-        report_to="wandb" if use_wandb else "none",
+        report_to=report_to,
         run_name=run_name,
     )
 

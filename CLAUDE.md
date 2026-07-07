@@ -20,7 +20,7 @@ GPU PC(1/2/3)는 모두 RTX 3050 **6GB**, Windows, CUDA 12.6. 공통 세팅: [do
 
 ## 협업 프로토콜 (멀티 PC)
 
-단일 진실 소스 = **이 GitHub repo**. 대용량은 HF Hub(private), 실험 지표는 wandb(`WANDB_PROJECT=annakkyeo`).
+단일 진실 소스 = **이 GitHub repo**. 대용량은 HF Hub(private). 실험 추적은 `.env` 의 `REPORT_TO`(기본 tensorboard, 무료·로컬 / wandb는 한도 제한). PC 간 최종 비교는 PC-3가 평가_실험로그.md 에 F1을 모아 수행.
 
 - 세션 시작: `git pull` → 역할 문서 + [docs/사전준비_체크리스트.md](docs/사전준비_체크리스트.md) 진행 로그로 전체 상황 파악
 - 작업 후: **작게 커밋하고 자주 push** (다른 PC가 오래된 상태로 일하지 않게)

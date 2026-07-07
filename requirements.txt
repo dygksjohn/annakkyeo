@@ -15,4 +15,5 @@ tqdm>=4.66
 # accelerate>=0.33
 # datasets>=2.20
 # sentencepiece
-# wandb
+# tensorboard      # 무료·로컬 실험 추적 (REPORT_TO=tensorboard)
+# wandb            # 선택 (클라우드 대시보드, 무료 한도 제한)

@@ -28,7 +28,7 @@ python -m src.train_qlora --model Qwen/Qwen3-1.7B --max-steps 10 --run-name smok
 python -m src.train_qlora --model Qwen/Qwen3-1.7B --run-name qwen3-1.7b-v1 --epochs 3
 ```
 - 산출물: `outputs/qwen3-1.7b-v1/` (LoRA 어댑터)
-- wandb 에서 train/val loss 하락 확인
+- train/val loss 하락 확인 (`REPORT_TO=tensorboard` → `tensorboard --logdir outputs`, 또는 콘솔 로그)
 
 ## 3. 어댑터 공유 (평가는 PC-3)
 ```cmd

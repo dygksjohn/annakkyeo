@@ -34,7 +34,7 @@ huggingface-cli upload {namespace}/annakkyeo-<run-name> outputs/<run-name> --rep
 ```
 - [ ] Kanana(A안) 어댑터 완성 (필수)
 - [ ] 여력 시 Qwen3-4B(B안)
-- [ ] PC-3 에서 접근 가능, wandb 에 PC-1 과 같은 프로젝트로 로그
+- [ ] PC-3 에서 접근 가능 (loss 추적은 `REPORT_TO`, 최종 비교는 PC-3 평가표)
 
 ## 비교 실험 원칙
 - 모든 모델을 **같은 데이터·같은 test셋(eval_sample)**으로 평가해야 의미 있음 → 평가는 전부 PC-3
