@@ -68,10 +68,9 @@ def main() -> None:
         bias="none", task_type="CAUSAL_LM", target_modules=TARGET_MODULES,
     )
 
-    # train = 실데이터(sft_train) + 증강(sft_aug, 있으면). val = 실데이터만.
+    # train = 실데이터(sft_train) + 증강(sft_aug*.jsonl: smishing/normal). val = 실데이터만.
     train_files = [str(PROCESSED_DIR / "sft_train.jsonl")]
-    aug = PROCESSED_DIR / "sft_aug.jsonl"
-    if aug.exists():
+    for aug in sorted(PROCESSED_DIR.glob("sft_aug*.jsonl")):
         train_files.append(str(aug))
         print(f"증강 데이터 포함: {aug.name}")
     ds = load_dataset(
