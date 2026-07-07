@@ -8,7 +8,7 @@ tqdm>=4.66
 
 # 파인튜닝 스택 (GPU PC 세팅 후 설치 — 버전은 GPU/CUDA에 맞춰 확정)
 # torch            # CUDA 빌드
-# transformers>=4.51    # Qwen3 아키텍처 지원 하한 (4.48 이하: "model type qwen3" 미인식으로 로드 실패)
+# transformers>=4.51,<5.0    # 하한: Qwen3 아키텍처 지원(4.48 이하 로드 실패) / 상한: v5.x 엄격 config 검증이 Kanana(head_dim 분리형 Llama) 로드 거부(2026-07 PC-2 확인)
 # peft>=0.12
 # trl>=0.9
 # bitsandbytes>=0.43

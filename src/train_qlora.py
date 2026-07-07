@@ -14,8 +14,9 @@ from __future__ import annotations
 import argparse
 import os
 
-import torch
+# ⚠️ Windows: datasets(pyarrow)를 torch보다 먼저 import 해야 native 심볼 충돌(segfault) 회피
 from datasets import load_dataset
+import torch
 from peft import LoraConfig
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from trl import SFTConfig, SFTTrainer
