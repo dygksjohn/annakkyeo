@@ -13,6 +13,14 @@ from __future__ import annotations
 import argparse
 import json
 
+# ⚠️ Windows: pyarrow(pandas read_csv 의 문자열 백엔드)를 torch 보다 먼저 로드해야
+# native 심볼 충돌(segfault) 회피. pandas 가 런타임 read_csv 때 pyarrow 를 늦게 로드하면
+# torch 와 충돌하므로 여기서 선(先)로드한다(미설치면 애초에 충돌 없음 → 무해).
+try:
+    import pyarrow  # noqa: F401
+except ImportError:
+    pass
+
 import torch
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
