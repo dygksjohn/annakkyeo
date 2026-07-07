@@ -63,12 +63,15 @@ def main() -> None:
         bias="none", task_type="CAUSAL_LM", target_modules=TARGET_MODULES,
     )
 
+    # train = 실데이터(sft_train) + 증강(sft_aug, 있으면). val = 실데이터만.
+    train_files = [str(PROCESSED_DIR / "sft_train.jsonl")]
+    aug = PROCESSED_DIR / "sft_aug.jsonl"
+    if aug.exists():
+        train_files.append(str(aug))
+        print(f"증강 데이터 포함: {aug.name}")
     ds = load_dataset(
         "json",
-        data_files={
-            "train": str(PROCESSED_DIR / "sft_train.jsonl"),
-            "validation": str(PROCESSED_DIR / "sft_val.jsonl"),
-        },
+        data_files={"train": train_files, "validation": str(PROCESSED_DIR / "sft_val.jsonl")},
     )
 
     cfg = SFTConfig(
