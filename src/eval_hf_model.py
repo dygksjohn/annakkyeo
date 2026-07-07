@@ -43,8 +43,11 @@ def load_model(model_id: str, adapter: str | None):
 @torch.no_grad()
 def generate(tok, model, text: str, max_new_tokens: int = 256) -> str:
     messages = build_messages(text)
+    # enable_thinking=False: Qwen3 등 하이브리드 추론 모델의 <think> 블록을 끔.
+    # 켜져 있으면 256토큰을 사고과정에 소진해 JSON 미출력→파싱 실패 급증.
+    # 이 kwarg를 참조하지 않는 템플릿(Llama/Kanana 등)은 무시하므로 안전.
     inputs = tok.apply_chat_template(
-        messages, add_generation_prompt=True, return_tensors="pt"
+        messages, add_generation_prompt=True, return_tensors="pt", enable_thinking=False
     ).to(model.device)
     out = model.generate(
         inputs, max_new_tokens=max_new_tokens, do_sample=False,
