@@ -21,7 +21,7 @@
 | D9 | 베이스 모델 최신 확인 (C3) | 계획서 4.1 갱신 | ✅ Qwen3-1.7B/Kanana 확정 |
 | D10 | 설명 품질 LLM-judge 스크립트 | `src/judge_explanation.py` | ✅ PC-3가 작성(머지 통합) — 개발PC는 지원 |
 | D11 | 실데이터 시드 수집 (B2) | `data/seed/*.csv` | ⏳ 상시 |
-| D12 | 증강 v2 (suspicious_domain·fear_appeal 태그 보강, 규모 확대) | `sft_aug.jsonl` 갱신 | ⏳ 선택 |
+| D12 | 증강 v2 — 정상 하드네거티브 800건 (FP 대응, 클래스 1:1) | `sft_aug_normal.jsonl` | ✅ HF 재업로드. **PC-1 재학습 필요** |
 
 ## 실행 순서 (개발 PC 내부)
 ```
