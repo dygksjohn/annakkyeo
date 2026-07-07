@@ -10,18 +10,23 @@
 
 ## 1. 베이스 모델 zero-shot 베이스라인 (GPU)
 계획 4.3의 베이스라인 ①. 파인튜닝 효과를 분리하려면 **같은 프롬프트**로 베이스 모델 측정.
+**측정 대상 = C3 재확정 베이스 모델**(주력 Qwen3-1.7B / 비교 Kanana-2.1B) — PC-1/PC-2가 실제 학습하는 모델과 일치시켜야 apples-to-apples.
 ```cmd
-python -m src.eval_hf_model --model Qwen/Qwen2.5-1.5B-Instruct --run-name qwen1.5b-zeroshot
-python -m src.eval_hf_model --model Qwen/Qwen2.5-3B-Instruct   --run-name qwen3b-zeroshot --limit 200
+python -m src.eval_hf_model --model Qwen/Qwen3-1.7B --run-name qwen3-1.7b-zeroshot
+python -m src.eval_hf_model --model kakaocorp/kanana-1.5-2.1b-instruct-2505 --run-name kanana-2.1b-zeroshot
 ```
 - 먼저 `--limit 20` 으로 생성이 정상인지 스모크 → 정상이면 전체(600)
+- ⚠️ **transformers ≥ 4.51 필수**(Qwen3 아키텍처 지원). 4.48.3에서는 `model type qwen3 ... not recognize` 로 로드 실패 → `pip install -U "transformers>=4.51"`. **PC-1/PC-2도 Qwen3 학습에 동일 요건**.
+- Qwen3는 하이브리드 추론 모델 → eval 은 `enable_thinking=False`(코드 반영)로 `<think>` 블록을 꺼야 JSON 정상 출력(안 끄면 파싱 실패 급증).
+- 구 후보(Qwen2.5-1.5B/3B) zero-shot 은 EXP-002/005 에 참고로 남김(모델 확정 변경 전 측정).
 
 ## 2. 파인튜닝 어댑터 평가 (PC-1/PC-2 산출물)
 어댑터를 HF/공유폴더에서 받아 평가:
 ```cmd
-hf download dygksjohn/annakkyeo-qwen1.5b-v1 --local-dir outputs/qwen1.5b-v1
-python -m src.eval_hf_model --model Qwen/Qwen2.5-1.5B-Instruct --adapter outputs/qwen1.5b-v1 --run-name qwen1.5b-qlora-v1
+hf download dygksjohn/annakkyeo-qwen3-1.7b-v1 --local-dir outputs/qwen3-1.7b-v1
+python -m src.eval_hf_model --model Qwen/Qwen3-1.7B --adapter outputs/qwen3-1.7b-v1 --run-name qwen3-1.7b-qlora-v1
 ```
+> 어댑터의 base `--model` 은 학습 때와 **동일 ID**(Qwen/Qwen3-1.7B)여야 로드됨.
 
 ## 3. 결과 기록
 각 실행이 `outputs/<run-name>/metrics.json` 을 남긴다. 이 숫자들을
@@ -30,9 +35,11 @@ python -m src.eval_hf_model --model Qwen/Qwen2.5-1.5B-Instruct --adapter outputs
 
 | EXP | 모델 | 방식 | F1(엄격) | 비고 |
 |-----|------|------|----------|------|
-| 001 | gpt-4o-mini | API zero-shot | 0.881 | 완료 |
-| 002 | Qwen2.5-1.5B | zero-shot | ? | PC-3 |
-| 004 | Qwen2.5-1.5B | QLoRA | ? | 목표: 001 근접 |
+| 001 | gpt-4o-mini | API zero-shot | 0.881 | 완료 (기준선) |
+| 006 | Qwen3-1.7B | zero-shot | ? | PC-3, 주력 base |
+| 007 | Kanana-2.1B | zero-shot | ? | PC-3, 비교 base |
+| 004 | Qwen3-1.7B | QLoRA | ? | 목표: 001 근접 (006 대비 개선폭) |
+| 002/005 | Qwen2.5-1.5B/3B | zero-shot | 0.486/0.476 | 구 후보(참고) |
 
 ## 4. 설명 품질 LLM-judge (계획 4.3 ②)
 판정(F1) 외에 **설명 품질**을 평가 — 루브릭: 사실성(문자 내용과 일치)·구체성·실행가능성.
@@ -42,8 +49,8 @@ python -m src.eval_hf_model --model Qwen/Qwen2.5-1.5B-Instruct --adapter outputs
 - 우선순위: 판정 비교표(1~3절)를 먼저 완성하고, 여력 있을 때 judge 추가.
 
 ## Exit 조건
-- [ ] Qwen 1.5B zero-shot vs QLoRA F1 비교 완성
-- [ ] (가능 시) 3B/Llama 포함 비교표
+- [ ] Qwen3-1.7B zero-shot vs QLoRA F1 비교 완성 (주력)
+- [ ] (가능 시) Kanana-2.1B zero-shot/QLoRA 포함 비교표
 - [ ] 평가_실험로그.md 갱신 (커밋 가능 — 숫자만)
 - [ ] (스트레치) 설명 품질 judge 점수
 

@@ -43,8 +43,11 @@ def load_model(model_id: str, adapter: str | None):
 @torch.no_grad()
 def generate(tok, model, text: str, max_new_tokens: int = 256) -> str:
     messages = build_messages(text)
+    # enable_thinking=False: Qwen3 등 하이브리드 추론 모델의 <think> 블록을 끔.
+    # 켜져 있으면 256토큰을 사고과정에 소진해 JSON 미출력→파싱 실패 급증.
+    # 이 kwarg를 참조하지 않는 템플릿(Llama/Kanana 등)은 무시하므로 안전.
     inputs = tok.apply_chat_template(
-        messages, add_generation_prompt=True, return_tensors="pt"
+        messages, add_generation_prompt=True, return_tensors="pt", enable_thinking=False
     ).to(model.device)
     out = model.generate(
         inputs, max_new_tokens=max_new_tokens, do_sample=False,
@@ -75,6 +78,25 @@ def run(model_id: str, adapter: str | None, run_name: str, limit: int | None) ->
 
     out_dir = OUTPUT_DIR / run_name
     out_dir.mkdir(parents=True, exist_ok=True)
+
+    # 원문은 남기지 않고 예측만 저장(설명 품질 judge 입력용). orig_index 로 원본 추적.
+    with open(out_dir / "predictions.jsonl", "w", encoding="utf-8") as f:
+        for i, p in enumerate(preds):
+            f.write(
+                json.dumps(
+                    {
+                        "orig_index": int(df.iloc[i].get("orig_index", i)),
+                        "true": y_true[i],
+                        "verdict": p.verdict,
+                        "risk_factors": p.risk_factors,
+                        "explanation": p.explanation,
+                        "parse_ok": p.parse_ok,
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n"
+            )
+
     metrics = {
         "model": model_id, "adapter": adapter, "n": len(df),
         "parse_failures": parse_fail,
