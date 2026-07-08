@@ -35,26 +35,63 @@ python -m src.eval_hf_model --model Qwen/Qwen3-1.7B --adapter outputs/qwen3-1.7b
 
 | EXP | 모델 | 방식 | F1(엄격) | 비고 |
 |-----|------|------|----------|------|
-| 001 | gpt-4o-mini | API zero-shot | 0.881 | 완료 (기준선) |
-| 006 | Qwen3-1.7B | zero-shot | ? | PC-3, 주력 base |
-| 007 | Kanana-2.1B | zero-shot | ? | PC-3, 비교 base |
-| 004 | Qwen3-1.7B | QLoRA | ? | 목표: 001 근접 (006 대비 개선폭) |
+| 001 | gpt-4o-mini | API zero-shot | 0.881 | 기준선 |
+| 006 | Qwen3-1.7B | zero-shot | 0.722 | ✅ 주력 base |
+| 007 | Kanana-2.1B | zero-shot | 0.545 | ✅ 비교 base |
+| 004 | Qwen3-1.7B | QLoRA v1 | **0.974** | ✅ ★ GPT 초과 (주력) |
+| 009 | Qwen3-1.7B | QLoRA v2 | 0.974 | ✅ 정밀도↑(FP15→10) |
+| 008 | Kanana-2.1B | QLoRA v1 | 0.984 | ✅ 비교 |
+| 010 | Kanana-2.1B | QLoRA v2 | **0.993** | ✅ ★ 재현율 우선 최고 |
+| 011 | Qwen3-4B | QLoRA v1 | 0.985 | ✅ 스케일업 |
+| 012 | Qwen3-4B | QLoRA v2 | **0.993** | ✅ ★ 정밀도 1.0·FP0 |
 | 002/005 | Qwen2.5-1.5B/3B | zero-shot | 0.486/0.476 | 구 후보(참고) |
 
-## 4. 설명 품질 LLM-judge (계획 4.3 ②)
-판정(F1) 외에 **설명 품질**을 평가 — 루브릭: 사실성(문자 내용과 일치)·구체성·실행가능성.
-- 어댑터가 생성한 `explanation` 을 GPT(`OPENAI_JUDGE_MODEL=gpt-4o`)로 1~5점 채점하는
-  judge 스크립트가 아직 없음 → **이 PC에서 `src/judge_explanation.py` 를 신규 작성**한다.
-  입력: `outputs/<run>/predictions.jsonl`(어댑터 평가 시 저장하도록 eval 확장), 출력: 평균 점수.
-- 우선순위: 판정 비교표(1~3절)를 먼저 완성하고, 여력 있을 때 judge 추가.
+전체 표·해석·한계는 [../평가_실험로그.md](../평가_실험로그.md). **결론: 파인튜닝 6종 전부 GPT(0.881) 초과.**
 
-## Exit 조건
-- [ ] Qwen3-1.7B zero-shot vs QLoRA F1 비교 완성 (주력)
-- [ ] (가능 시) Kanana-2.1B zero-shot/QLoRA 포함 비교표
-- [ ] 평가_실험로그.md 갱신 (커밋 가능 — 숫자만)
-- [ ] (스트레치) 설명 품질 judge 점수
+## 4. 설명 품질 LLM-judge (계획 4.3 ②) — ✅ 완료
+판정(F1) 외에 **설명 품질**을 평가 — 루브릭: 사실성·구체성·실행가능성 3축 1~5점(gpt-4o).
+- `src/judge_explanation.py` 작성 완료. 입력 `outputs/<run>/predictions.jsonl`(eval 시 자동 저장).
+- 실행: `python -m src.judge_explanation --run qwen3-1.7b-qlora-v1`
+- **결과(EXP-004 설명)**: 사실성 **4.48** / 구체성 2.98 / 실행가능성 3.68, 종합 **3.71/5** (553/600 채점).
+  → "판정 F1 0.974 + 설명 사실성 4.48"로 차별점 정량 입증. 약점=구체성(v2 라벨 개선여지).
+
+## Exit 조건 — ✅ 전부 충족 (2026-07-08)
+- [x] Qwen3-1.7B zero-shot(0.722) vs QLoRA(v1 0.974·v2 0.974) F1 비교 완성 (주력)
+- [x] Kanana-2.1B(zero 0.545 / v1 0.984 / v2 0.993) + Qwen3-4B(v1 0.985 / v2 0.993) 포함 **6종 매트릭스**
+- [x] 평가_실험로그.md 갱신 (EXP-004·006~012, 숫자만 커밋)
+- [x] 설명 품질 judge 점수 (사실성 4.48)
+
+---
+
+## 실행 결과 요약 (2026-07-08 세션)
+
+**한 일**: base zero-shot 2종(006/007) + QLoRA 어댑터 6종(004/008/009/010/011/012) 공식 600건 평가,
+설명 품질 judge(A2), 최종 비교표 완성. 모두 `../평가_실험로그.md`·진행 로그에 기록.
+
+**핵심 결론**
+- 파인튜닝 6종 전부 GPT-4o-mini(0.881) **초과**(F1 0.974~0.993).
+- 최고점 2개(운영점 상이): **Kanana-2.1B v2**(F1 0.993, 재현율 0.997/FP3) · **Qwen3-4B v2**(F1 0.993, **정밀도 1.0/FP0 무오탐**).
+- 정밀도 개선 두 축: ① v2 하드네거티브 재균형(전 모델 FP↓) ② 스케일업(1.7B→4B, FP15→8). 겹치면(4B v2) FP=0.
+- **주력 권고**: 1.7B로도 GPT 초과 → 배포·속도상 Qwen3-1.7B 유지, 4B는 "키우면 무오탐" 근거.
+- **한계(정직)**: 위는 학습과 동일 출처 분포 held-out. 별도 실 held-out(24건)은 재현율 0.58~0.67로 하락(신유형 미탐, PC-1 C3b) → 일반화 갭. v3에서 신유형 다양화 권장.
+
+**평가한 어댑터(HF private)**: `annakkyeo-{qwen3-1.7b,kanana2.1b,qwen3-4b}-v{1,2}` (base: Qwen3-1.7B / kanana-1.5-2.1b / Qwen3-4B-Instruct-2507)
+
+---
+
+## 환경·재현 노하우 (이 세션에서 확인 — 다음 PC-3 세션 필독)
+
+- **transformers 버전**: Qwen3 로드에 **≥4.51 필수**(4.48은 `model type qwen3` 미인식), Kanana 로드에 **<5.0 필수**(v5 엄격검증이 head_dim 분리형 Llama 거부). 이 세션 확정본 **4.56.2**. `.venv`(Python 3.12) 사용.
+- **Qwen3 thinking**: `eval_hf_model.generate()` 에 `enable_thinking=False` 반영됨(없으면 `<think>`가 256토큰 소진→파싱실패 급증). Llama/Kanana 템플릿은 무시하므로 안전.
+- **비공개 어댑터 다운로드**: `.env`의 `HF_TOKEN` 필요. `export $(grep ^HF_TOKEN= .env | xargs); hf download <repo> --local-dir outputs/<name>`.
+- **한글 콘솔 깨짐(cp949)**: 실행 시 `PYTHONIOENCODING=utf-8` 지정(출력만 깨질 뿐 metrics.json은 UTF-8 정상).
+- **base는 자동 다운로드**되나 4B(~8GB)는 시간이 걸림 → 첫 4B 평가 전 `hf download Qwen/Qwen3-4B-Instruct-2507`로 선캐시 권장.
+- **평가 소요**: 1.7~2.1B ≈ 11~14초/건, 4B ≈ 14~16초/건 → 600건 약 2~2.7h. 백그라운드 실행 권장(로그는 `| tail` 말고 **파일 리다이렉트**로 남겨야 진행 확인 가능).
+- **어댑터 base 확인**: `outputs/<name>/adapter_config.json`의 `base_model_name_or_path` — `--model`에 이 값을 그대로 넣어야 로드됨.
 
 ## 막히면
 - 생성이 느림/타임아웃: `--limit` 로 표본 축소해 먼저 숫자 확보 후 전체
-- OOM(추론): 4bit 이므로 드묾. 나면 다른 프로세스 GPU 점유 확인
+- OOM(추론): 4bit 이므로 드묾. 나면 다른 프로세스 GPU 점유 확인(`nvidia-smi`)
 - 어댑터 로드 실패: 베이스 `--model` 이 학습 때와 동일 ID 인지 확인(불일치 시 로드 안 됨)
+- Qwen3 로드 실패(`model type qwen3`): transformers 업그레이드(위 참조)
+- 스모크는 `eval_sample.csv` head 20(스미싱14/정상6)이라 F1이 낙관적 → 판단은 전체 600건 기준
