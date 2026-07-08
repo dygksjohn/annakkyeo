@@ -41,6 +41,7 @@ runs/
 data/kisa/
 data/raw/
 data/processed/
+data/processed_*/
 *.parquet
 *.arrow
 
