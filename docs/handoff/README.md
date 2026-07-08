@@ -34,15 +34,17 @@
         │
         ▼
 [Phase C] 포트폴리오 패키징 (7/14 목표)
-  C1 Gradio 데모 (반나절)                              [개발 PC]
-  C2 평가 리포트 + HF 모델 카드                         [개발 PC]
-  C3 (선택) 실 held-out 테스트셋 — 다른 분포 검증       [개발 PC]
+  C1  Gradio 데모 (반나절)                             [개발 PC]
+  C2  평가 리포트 + HF 모델 카드                        [개발 PC]
+  C3a 실 held-out 셋 수집(뉴스·보안공지) + HF 업로드     [개발 PC]  ← GPU 불필요
+  C3b held-out 추론·평가 v1/v2 (다른 분포)             [GPU PC: PC-1/PC-3]  ← GPU 필요
 ```
 
 **핵심 의존관계 / 유의**
 - A2·A3는 데이터·어댑터가 이미 있어 **지금 착수 가능** (PC-3)
 - B1(v2 재학습)은 개발 PC v2 균형 데이터 업로드 완료 → `hf download` 후 바로 가능
-- ⚠️ 현재 test셋(eval_sample)은 **Kor-Smishing 동일 분포**. F1 0.974는 유효하나, C3(실 held-out)이 있으면 "다른 분포에서도 GPT급" 주장이 훨씬 강해짐 → 리포트 전 확보 권장
+- **C3 분리**: 수집(C3a, 개발 PC) → HF 업로드 → 평가(C3b, GPU PC). held-out 추론은 GPU 필요이므로 개발 PC가 아닌 **어댑터·하네스 보유 PC(PC-1 또는 PC-3)**가 담당. `eval_hf_model.py`에 `--eval-file` 인자 추가 필요(현재 eval_sample 고정)
+- ⚠️ 현재 test셋(eval_sample)은 **Kor-Smishing 동일 분포**. F1 0.974는 유효하나, C3(실 held-out)으로 **다른 분포**에서도 GPT급을 보이면 주장이 훨씬 강해짐 → 리포트 전 확보 권장
 >
 > 에이전트에게: **"이 PC에서는 PC-1 작업을 한다"** 처럼 역할을 지정받으면, 이 공통 세팅을
 > 마친 뒤 해당 역할 문서의 절차를 순서대로 실행하라. GPU가 필요한 명령은 실제 하드웨어에서
