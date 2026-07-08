@@ -64,12 +64,17 @@ def generate(tok, model, text: str, max_new_tokens: int = 256) -> str:
     return tok.decode(out[0][inputs.shape[1]:], skip_special_tokens=True)
 
 
-def run(model_id: str, adapter: str | None, run_name: str, limit: int | None) -> dict:
+def run(model_id: str, adapter: str | None, run_name: str, limit: int | None,
+        eval_file: str | None = None) -> dict:
     tok, model = load_model(model_id, adapter)
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
 
-    df = get_eval_sample()
+    if eval_file:  # held-out 등 임의 평가셋 (다른 분포 검증)
+        from .data import load_eval_csv
+        df = load_eval_csv(eval_file)
+    else:
+        df = get_eval_sample()
     if limit:
         df = df.head(limit)
     y_true = df["class"].astype(int).tolist()
@@ -129,8 +134,10 @@ def main() -> None:
     ap.add_argument("--adapter", default=None, help="QLoRA 어댑터 경로(없으면 베이스 zero-shot)")
     ap.add_argument("--run-name", required=True)
     ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument("--eval-file", default=None,
+                    help="임의 평가셋 CSV(content,class). 미지정 시 eval_sample 사용")
     args = ap.parse_args()
-    run(args.model, args.adapter, args.run_name, args.limit)
+    run(args.model, args.adapter, args.run_name, args.limit, args.eval_file)
 
 
 if __name__ == "__main__":
