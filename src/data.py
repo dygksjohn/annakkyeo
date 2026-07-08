@@ -60,3 +60,16 @@ def get_eval_sample(n_per_class: int = 100, seed: int = 42) -> pd.DataFrame:
     if EVAL_SAMPLE_CSV.exists():
         return pd.read_csv(EVAL_SAMPLE_CSV, encoding="utf-8-sig")
     return make_eval_sample(n_per_class=n_per_class, seed=seed)
+
+
+def load_eval_csv(path: str | Path) -> pd.DataFrame:
+    """임의 평가셋 CSV 로드 (held-out 등). 필수 컬럼: content, class(0/1)."""
+    df = pd.read_csv(path, encoding="utf-8-sig")
+    missing = {"content", "class"} - set(df.columns)
+    if missing:
+        raise ValueError(f"{path}: 필수 컬럼 누락 {missing} (content, class 필요)")
+    df = df.dropna(subset=["content"]).copy()
+    df["content"] = df["content"].astype(str).str.strip()
+    df = df[df["content"] != ""]
+    df["class"] = df["class"].astype(int)
+    return df.reset_index(drop=True)
